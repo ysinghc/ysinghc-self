@@ -10,7 +10,7 @@ class Post(BaseModel):
     title: str
     content: str
     published: bool = True
-    mood: Optional[int]
+    mood: Optional[int] = None
 
 my_app = FastAPI()
 
