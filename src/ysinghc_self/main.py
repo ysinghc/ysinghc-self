@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 from unittest.mock import Base
 
 from fastapi import FastAPI
@@ -10,6 +10,7 @@ class Post(BaseModel):
     title: str
     content: str
     published: bool = True
+    mood: Optional[int]
 
 my_app = FastAPI()
 
