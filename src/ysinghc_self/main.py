@@ -10,18 +10,30 @@ class Post(BaseModel):
     title: str
     content: str
     published: bool = True
-    mood: Optional[int] = None
 
 my_app = FastAPI()
 
+#in memory storage
+
+latest_id = 2
+my_posts = [
+    {"id": 1, "title": "This the title of post with id 1", "content": "this is the content of the post with id 1"},
+    {"id": 2, "title": "This the title of post with id 2", "content": "this is the content of the post with id 2"}
+]
 @my_app.get("/")
 def root() -> dict[str, str]:
     return {"message": "Welcome to my website"}
 
 @my_app.get("/v1/posts/")
-def get_posts() -> dict[str, str]:
-    return {"data": "This is your posts"}
+def get_posts() -> dict:
+    all_posts = {"data": my_posts}
+    return all_posts
 
-@my_app.post("/v1/posts/new/")
-async def create_posts(new_post: Post) -> dict[str, Post]:
-    return {"Recieved successfully": new_post}
+@my_app.post("/v1/posts/")
+def create_post(post: Post) ->dict[str, Any]:
+    global latest_id
+    post_dict = post.model_dump()
+    post_dict["id"] = latest_id+1
+    my_posts.append(post_dict)
+    latest_id += 1
+    return {"success": "true", "data": post_dict}
