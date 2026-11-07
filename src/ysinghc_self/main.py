@@ -5,7 +5,7 @@ from sre_constants import SUCCESS
 from typing import Any, Optional
 from unittest.mock import Base
 
-from fastapi import FastAPI, Response, status
+from fastapi import FastAPI, HTTPException, Response, status
 from fastapi.params import Body
 
 from pydantic import BaseModel
@@ -44,7 +44,7 @@ def get_posts() -> dict:
     return all_posts
 
 ### CREATE NEW POST
-@my_app.post("/v1/posts/")
+@my_app.post("/v1/posts/", status_code=status.HTTP_201_CREATED)
 def create_post(post: Post) ->dict[str, Any]:
     global latest_id
     post_dict = post.model_dump()
@@ -54,14 +54,11 @@ def create_post(post: Post) ->dict[str, Any]:
     return {"success": "true", "data": post_dict}
 
 @my_app.get("/v1/posts/{id}")
-def get_post_id(id, response_code: Response):
+def get_post_id(id):
     try:
         post = find_post(int(id))
         if post == None:
-            response_code.status_code = status.HTTP_404_NOT_FOUND
-            return {"success": "false"}
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid Input")
         return {"success": "true", "data": post}
     except ValueError:
-            response_code.status_code = status.HTTP_404_NOT_FOUND
-            return {"success": "false"}
-        
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid Input")
