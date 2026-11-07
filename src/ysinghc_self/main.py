@@ -1,4 +1,7 @@
+from ast import Not
 from email.errors import NonPrintableDefect
+from operator import truediv
+from sre_constants import SUCCESS
 from typing import Any, Optional
 from unittest.mock import Base
 
@@ -52,5 +55,11 @@ def create_post(post: Post) ->dict[str, Any]:
 
 @my_app.get("/v1/posts/{id}")
 def get_post_id(id):
-    post = find_post(int(id))
-    return {"success": "true", "data": post}
+    try:
+        post = find_post(int(id))
+        if post == None:
+            return {"success": "false"}
+        return {"success": "true", "data": post}
+    except ValueError:
+            return {"success": "false"}
+        
