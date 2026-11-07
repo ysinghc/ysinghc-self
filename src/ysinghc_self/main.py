@@ -1,4 +1,14 @@
+from typing import Any
+from unittest.mock import Base
+
 from fastapi import FastAPI
+from fastapi.params import Body
+
+from pydantic import BaseModel
+
+class Post(BaseModel):
+    title: str
+    content: str
 
 my_app = FastAPI()
 
@@ -11,5 +21,5 @@ def get_posts() -> dict[str, str]:
     return {"data": "This is your posts"}
 
 @my_app.post("/v1/posts/new/")
-async def create_posts(payload: dict = Body(...)) -> dict[str, dict[Any, Any]]:
-    return {"Recieved successfully": payload}
+async def create_posts(new_post: Post) -> dict[str, Post]:
+    return {"Recieved successfully": new_post}
