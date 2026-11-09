@@ -5,7 +5,7 @@ from sre_constants import SUCCESS
 from typing import Any, Optional
 from unittest.mock import Base
 
-from fastapi import FastAPI, HTTPException, Response, status
+from fastapi import FastAPI, HTTPException, Response, responses, status
 from fastapi.params import Body
 
 from pydantic import BaseModel
@@ -30,6 +30,14 @@ def find_post(id: int)-> dict[str, Any] | None:
         if p["id"] == id:
             return p
 
+def delete_post(id: int) -> bool:
+    for p in my_posts:
+        if p["id"] == id:
+            my_posts.remove(p)
+            return True
+
+    return False
+
 #root path
 @my_app.get("/")
 def root() -> dict[str, str]:
@@ -53,6 +61,7 @@ def create_post(post: Post) ->dict[str, Any]:
     latest_id += 1
     return {"success": "true", "data": post_dict}
 
+### GET POST BY ID
 @my_app.get("/v1/posts/{id}")
 def get_post_id(id):
     try:
@@ -62,3 +71,11 @@ def get_post_id(id):
         return {"success": "true", "data": post}
     except ValueError:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid Input")
+
+### DELETE A POST BY ID
+@my_app.delete("/v1/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_post_id(id: int):
+    if delete_post(id):
+        return
+
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
