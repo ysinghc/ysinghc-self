@@ -1,7 +1,9 @@
 from ast import Not
 from email.errors import NonPrintableDefect
+from email.policy import HTTP
 from operator import truediv
 from sre_constants import SUCCESS
+from tkinter import S
 from typing import Any, Optional
 from unittest.mock import Base
 
@@ -21,8 +23,8 @@ my_app = FastAPI()
 
 latest_id = 2
 my_posts = [
-    {"id": 1, "title": "This the title of post with id 1", "content": "this is the content of the post with id 1"},
-    {"id": 2, "title": "This the title of post with id 2", "content": "this is the content of the post with id 2"}
+    {"id": 1, "title": "This the title of post with id 1", "content": "this is the content of the post with id 1", "published": True},
+    {"id": 2, "title": "This the title of post with id 2", "content": "this is the content of the post with id 2", "published": True}
 ]
 
 def find_post(id: int)-> dict[str, Any] | None:
@@ -35,6 +37,17 @@ def delete_post(id: int) -> bool:
         if p["id"] == id:
             my_posts.remove(p)
             return True
+
+    return False
+
+def update_post(id: int, post: Post):
+    post_dict = post.model_dump()
+    post_dict["id"] = id    # handles user trying to update the id
+    for p in my_posts:
+            if p["id"] == id:
+                my_posts.remove(p)
+                my_posts.append(post_dict)
+                return True
 
     return False
 
@@ -79,3 +92,11 @@ def delete_post_id(id: int):
         return
 
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+@my_app.put("/v1/posts/{id}")
+def update_post_id(id: int, post: Post):
+
+    if update_post(id, post):
+        return {"message": f"Post with id: {id} updated successfully"}
+    
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"{id} not found")
